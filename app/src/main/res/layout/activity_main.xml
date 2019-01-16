@@ -35,6 +35,7 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="202dp"
         android:ems="10"
+        tools:inputType="textPassword"
         android:hint="password"
         android:inputType="textImeMultiLine|textPersonName" />
 
