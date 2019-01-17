@@ -16,12 +16,14 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.FirebaseDatabase;
 
 public class MainActivity extends AppCompatActivity {
 
     EditText mUsernameTextView, mPasswordTextView;
 
     FirebaseAuth mAuth;
+    FirebaseDatabase mDataBase;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,8 +34,9 @@ public class MainActivity extends AppCompatActivity {
 
         mAuth = FirebaseAuth.getInstance();
         if (mAuth.getCurrentUser() != null) {
-
+            logInDone();
         }
+        mDataBase = FirebaseDatabase.getInstance();
     }
 
     public void goClick(View view) {
@@ -45,7 +48,12 @@ public class MainActivity extends AppCompatActivity {
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             if (task.isSuccessful()) {
-                                //Login OK
+                                //Login OK and add to firebase db
+                                mDataBase.getReference()
+                                        .child("users")
+                                        .child(task.getResult().getUser().getUid())
+                                        .child("email").setValue(mUsernameTextView.getText().toString());
+
                                 logInDone();
                             } else {
                                 AlertDialog.Builder alertBuilder = new AlertDialog.Builder(MainActivity.this)
@@ -74,10 +82,10 @@ public class MainActivity extends AppCompatActivity {
 
     private void signUp() {
         mAuth.createUserWithEmailAndPassword(mUsernameTextView.getText().toString(), mPasswordTextView.getText().toString())
-                .addOnSuccessListener(new OnSuccessListener<AuthResult>() {
+                .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                     @Override
-                    public void onSuccess(AuthResult authResult) {
-                        if (authResult.getUser() != null) {
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if (task.getResult() != null) {
                             //User created
                             logInDone();
                         } else {

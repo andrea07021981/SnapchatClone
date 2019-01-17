@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.projects.andreafranco.snapchatclone">
 
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <application
         android:allowBackup="true"
@@ -20,7 +20,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".SnapsActivity" />
-        <activity android:name=".CreateSnapActivity"></activity>
+        <activity android:name=".CreateSnapActivity" />
+        <activity android:name=".ChooseUserActivity"></activity>
     </application>
 
 </manifest>

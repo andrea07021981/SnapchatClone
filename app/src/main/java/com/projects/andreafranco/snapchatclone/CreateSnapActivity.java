@@ -11,6 +11,7 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -82,29 +83,42 @@ public class CreateSnapActivity extends AppCompatActivity {
     }
 
     public void nextButtonClick(View view) {
-        mLoadedImageview.setDrawingCacheEnabled(true);
-        mLoadedImageview.buildDrawingCache();
-        Bitmap bitmap = ((BitmapDrawable) mLoadedImageview.getDrawable()).getBitmap();
-        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-        byte[] data = baos.toByteArray();
+        if (mLoadedImageview.getDrawable() instanceof BitmapDrawable &&
+                !TextUtils.isEmpty(mMessageEdittext.getText())) {
 
-        //Folder on firebase called images
-        StorageReference imagesReference = mFirebaseStorage.getReference().child("images").child(mImageName);
+            mLoadedImageview.setDrawingCacheEnabled(true);
+            mLoadedImageview.buildDrawingCache();
+            Bitmap bitmap = ((BitmapDrawable) mLoadedImageview.getDrawable()).getBitmap();
+            final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+            byte[] data = baos.toByteArray();
 
-        UploadTask uploadTask = imagesReference.putBytes(data);
-        uploadTask.addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                Toast.makeText(CreateSnapActivity.this, "Upload failed", Toast.LENGTH_SHORT).show();
-            }
-        });
-        uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-            @Override
-            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                String path = taskSnapshot.getUploadSessionUri().getPath();
-                Toast.makeText(CreateSnapActivity.this, "Upload file path: " +path, Toast.LENGTH_SHORT).show();
-            }
-        });
+            //Folder on firebase called images
+            StorageReference imagesReference = mFirebaseStorage.getReference().child("images").child(mImageName);
+
+            UploadTask uploadTask = imagesReference.putBytes(data);
+            uploadTask.addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    Toast.makeText(CreateSnapActivity.this, "Upload failed", Toast.LENGTH_SHORT).show();
+                }
+            });
+            uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                    String path = taskSnapshot.getUploadSessionUri().getPath();
+                    Toast.makeText(CreateSnapActivity.this, "Upload file path: " +path, Toast.LENGTH_SHORT).show();
+
+                    Intent intent = new Intent(CreateSnapActivity.this, ChooseUserActivity.class);
+                    intent.putExtra("imageUrl", path);
+                    intent.putExtra("imageName", mImageName);
+                    intent.putExtra("message", mMessageEdittext.getText().toString());
+                    startActivity(intent);
+                }
+            });
+        } else {
+            //Image not loaded
+            Toast.makeText(this, "Complete all fields", Toast.LENGTH_SHORT).show();
+        }
     }
 }
